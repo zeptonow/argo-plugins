@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: example-rollout
+  namespace: default
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - plugin:
+          name: mandatory-pause
+          config:
+            duration: "3m"  # Mandatory 3-minute pause
+      - setWeight: 40
+      - plugin:
+          name: mandatory-pause
+          config:
+            duration: "5m"  # Mandatory 5-minute pause
+      - setWeight: 60
+      - plugin:
+          name: mandatory-pause
+          config:
+            duration: "2m"  # Mandatory 2-minute pause
+      - setWeight: 80
+      - plugin:
+          name: mandatory-pause
+          config:
+            duration: "1m"  # Mandatory 1-minute pause before full rollout
+      - setWeight: 100
+      trafficRouting:
+        nginx:
+          stableIngress: example-stable-ingress
+          annotationPrefix: nginx.ingress.kubernetes.io
+  selector:
+    matchLabels:
+      app: example-app
+  template:
+    metadata:
+      labels:
+        app: example-app
+    spec:
+      containers:
+      - name: example-app
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

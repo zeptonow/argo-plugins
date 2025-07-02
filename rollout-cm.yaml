@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argo-rollouts-mandatory-pause-plugin
+  namespace: argo-rollouts
+data:
+  plugin: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: PluginConfig
+    metadata:
+      name: mandatory-pause
+    spec:
+      type: Step
+      image: argo-rollouts-mandatory-pause-plugin:latest
